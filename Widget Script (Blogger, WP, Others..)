@@ -1,0 +1,72 @@
+<b:if cond='data:blog.url == data:blog.homepageUrl'> // ✅ Page of integration (Homepage, Post, Standalone)
+    <script>
+        function createTickerWidget() {  
+            const tickerContainer = document.createElement("div"); // ✅ Widget create prompt
+            tickerContainer.id = "rssTickerContainer";
+            tickerContainer.style.whiteSpace = "nowrap";
+            tickerContainer.style.overflow = "hidden";
+            tickerContainer.style.background = "#fff478";
+            tickerContainer.style.color = "black";
+            tickerContainer.style.padding = "10px";
+            tickerContainer.style.fontFamily = "Open Sans, sans-serif";
+            tickerContainer.style.fontWeight = "100";
+            tickerContainer.style.fontSize = "16px";
+            
+            const tickerContent = document.createElement("div");
+            tickerContent.id = "rssTicker";
+            tickerContent.style.display = "inline-block";
+            tickerContent.style.animation = "scroll 80s linear infinite"; // ✅ Scroll speed and type
+            tickerContent.innerHTML = "Fetching latest news..."; // ✅ Instant placeholder
+            tickerContent.style.fontWeight = "100";
+
+            tickerContainer.appendChild(tickerContent);
+            document.querySelector("div#header-wrap")?.after(tickerContainer); // ✅ Position of widget (specify - div#)
+
+            fetchRSS(); // ✅ Load feed immediately
+            setInterval(fetchRSS, 300000); // Refresh every 5 minutes // ✅ Fetching interval
+        }
+        
+        async function fetchRSS() {
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000); // ✅ API request timeout
+
+                // ✅ Fully Encoded RSS API URL // ✅ Paste your RSS Url here!
+                const rssApiUrl = "https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fnews.google.com%2Frss%2Fsearch%3Fq%3Dhealth-technology%26hl%3Den-US%26gl%3DUS%26ceid%3DUS%3Aen%26count%3D20";
+                
+                const response = await fetch(rssApiUrl, { signal: controller.signal });
+
+                clearTimeout(timeoutId);
+                
+                if (!response.ok) throw new Error("Network response was not ok");
+                
+                const data = await response.json();
+                
+                if (!data.items || data.items.length === 0) {
+                    throw new Error("No articles found in the feed.");
+                }
+
+                let headlines = data.items.map(item => 
+                    `<a href="${item.link}" style="color: black; text-decoration: none; font-weight: 100; font-size: 16px; margin-right: 20px;" target="_blank">${item.title}</a>`
+                ).join(" • ");
+                
+                document.getElementById("rssTicker").innerHTML = `<span>${headlines}</span>`; // ✅ Specify element
+            } catch (error) {
+                console.error("RSS Fetch Error:", error);
+                document.getElementById("rssTicker").innerHTML = "Latest news unavailable. Please refresh.";
+            }
+        }
+        
+        window.addEventListener("DOMContentLoaded", createTickerWidget);
+    </script>
+    <style>
+        @keyframes scroll {
+            from { transform: translateX(0%); }  /* ✅ Starts at the extreme start */
+            to { transform: translateX(-100%); }
+        }
+        #rssTickerContainer:hover #rssTicker {
+            animation-play-state: paused !important; // ✅ Hover to pause functionality
+        }
+    </style>
+</b:if>
+
