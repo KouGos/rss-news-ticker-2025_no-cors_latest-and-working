@@ -1,0 +1,64 @@
+from flask import Flask, render_template_string  # 🚀 Import necessary Flask modules
+import feedparser  # 🔄 Import feedparser to fetch RSS feeds
+
+app = Flask(__name__)  # 🏗️ Initialize Flask app
+
+RSS_URL = "https://news.google.com/rss/search?q=health-technology&hl=en-US&gl=US&ceid=US:en"  # 🌍 RSS Feed URL
+
+def fetch_rss():
+    feed = feedparser.parse(RSS_URL)  # 📡 Parse the RSS feed
+    if not feed.entries:
+        return "<span>Latest news unavailable. Please refresh.</span>"  # ❌ Handle no news case
+    headlines = [
+        f"<a href='{entry.link}' style='color: black; text-decoration: none; font-weight: 100; font-size: 16px; margin-right: 20px;' target='_blank'>{entry.title}</a>"  # 🔗 Format each news headline as a clickable link
+        for entry in feed.entries[:10]  # 📰 Limit to 10 news articles
+    ]
+    return "<span>" + " • ".join(headlines) + "</span>"  # 🏷️ Join headlines with separators
+
+HTML_TEMPLATE = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSS Ticker</title>
+    <style>
+        #rssTickerContainer {
+            white-space: nowrap;  /* 📜 Prevent text wrapping */
+            overflow: hidden;  /* 🔒 Hide overflowing text */
+            background: #fff478;  /* 🎨 Set background color */
+            color: black;  /* 🎨 Set text color */
+            padding: 10px;  /* 📏 Add padding */
+            font-family: 'Open Sans', sans-serif;
+            font-weight: 100;
+            font-size: 16px;
+        }
+        #rssTicker {
+            display: inline-block;
+            animation: scroll 80s linear infinite;  /* 🎞️ Animate text scrolling */
+        }
+        @keyframes scroll {
+            from { transform: translateX(0%); }  /* 🎬 Start position */
+            to { transform: translateX(-100%); }  /* 🎬 End position */
+        }
+        #rssTickerContainer:hover #rssTicker {
+            animation-play-state: paused !important;  /* ⏸️ Pause scrolling on hover */
+        }
+    </style>
+</head>
+<body>
+    <div id="rssTickerContainer">
+        <div id="rssTicker">
+            {{ rss_content|safe }}  <!-- 📰 Inject fetched RSS content dynamically -->
+        </div>
+    </div>
+</body>
+</html>
+"""
+
+@app.route('/')
+def index():
+    return render_template_string(HTML_TEMPLATE, rss_content=fetch_rss())  # 🌐 Render the HTML page with RSS content
+
+if __name__ == '__main__':
+    app.run(debug=True)  # 🚀 Run the Flask app in debug mode
