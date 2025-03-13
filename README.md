@@ -16,6 +16,7 @@ This **RSS ticker** is ideal for **web developers, startups, and tech enthusiast
 ## **✨ Features**  
 ✅ **Fetches latest news** from any RSS feed.  
 ✅ **Instantly displays headlines** on page load (no delay).  
+✅ **Links are clickable** Interactive widget.  
 ✅ **Auto-refreshes every 5 minutes** to update with new articles.  
 ✅ **Starts scrolling from the extreme left** for immediate visibility.  
 ✅ **Smooth & adjustable scrolling speed (default: 80s)**.  
